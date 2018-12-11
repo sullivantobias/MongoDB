@@ -1,17 +1,31 @@
 <html>
- <body>
-   <label for="">Sign up</label>
-  <form method="post" action="/signUp.html">
-    <input type="text" name="name">
-    <input type="password" name="password">
-    <input type="submit" value="Sign Up">
-  </form>
+  <head>
+    <title>Form</title>
+  </head>
+  <body>
+    <label for="">Sign up</label>
+    <form method="post" action="/signUp.html">
+      <input type="text" name="name" />
+      <input type="password" name="password" />
+      <div><label for="admin">Are you an admin ?</label></div>
+      <input type="checkbox" name="admin" id="admin" />
+      <input
+        type="text"
+        name="adminPass"
+        id="adminPass"
+        placeholder="adminPassword"
+        style="display:none"
+      />
+      <input type="submit" value="Sign Up" />
+    </form>
 
-  <label for="">Sign in</label>
-  <form method="post" action="/signIn.html">
-    <input type="text" name="nameIn">
-    <input type="password" name="passwordIn">
-    <input type="submit" value="Connect">
-  </form>
- </body>
+    <label for="">Sign in</label>
+    <form method="post" action="/signIn.html">
+      <input type="text" name="nameIn" />
+      <input type="password" name="passwordIn" />
+      <input type="submit" value="Connect" />
+    </form>
+
+    <script src="./frontJS/admin.js"></script>
+  </body>
 </html>
