@@ -69,28 +69,48 @@ server.post('/signIn.html', (request, response) => {
       const dbo = db.db('Form');
       const user = {name: nameIn, password: passIn};
 
-      localStorage.setItem('userName', user.name);
-
       dbo.collection('users').countDocuments(user, (err, res) => {
         let users = [];
+        let selectUsers = [];
+
         if (res > 0) {
+          localStorage.setItem('userName', user.name);
+          dbo.collection('users').findOne({name: user.name}, (err, res) => {
+            console.log(res.status);
+            localStorage.setItem('status', res.status);
+          });
+
           dbo
             .collection('users')
             .find({})
             .toArray((err, res) => {
               for (let i = 0; i < res.length; i++) {
                 users.push('<li>' + res[i].name + '</li>');
+                selectUsers.push('<option>' + res[i].name + '</option>');
               }
-              response.send(
+
+              const body =
                 '<h1>Welcome ' +
-                  user.name +
-                  '</h1>List of users : <ul>' +
-                  users.join(' ') +
-                  '</ul>' +
-                  '<form method="post" action="/change.html"><h3>Change your password ?</h3> <input type="text" name="changePass" placeholder="change password"></input> <button type="submit" name="changePassword">Change</button></form>' +
-                  '<form method="post" action="/delete.html"><h3>Delete your account ?</h3> <button type="submit" name="deleteAccount">Delete</button></form>'
-              );
-              db.close();
+                user.name +
+                '</h1>List of users : <ul>' +
+                users.join(' ') +
+                '</ul>' +
+                '<form method="post" action="/change.html"><h3>Change your password ?</h3> <input type="text" name="changePass" placeholder="change password"></input> <button type="submit" name="changePassword">Change</button></form>' +
+                '<form method="post" action="/delete.html"><h3>Delete your account ?</h3> <button type="submit" name="deleteAccount">Delete</button></form>';
+
+              if (localStorage.getItem('status') === 'admin') {
+                response.send(
+                  body +
+                    '<h2>As an admin you can delete some account </h2>' +
+                    '<form action="/adminDelete.html" method="post"><select name="selectName">' +
+                    selectUsers +
+                    '</select>' +
+                    '<button type="submit">Delete</button>' +
+                    '</form>'
+                );
+              } else {
+                response.send(body);
+              }
             });
         } else {
           response.sendFile(__dirname + '/form.html');
@@ -142,4 +162,22 @@ server.post('/delete.html', (request, response) => {
   response.send(
     '<h1>Account deleted</h1><a href="/form.html">return to form</a>'
   );
+});
+
+server.post('/adminDelete.html', (request, response) => {
+  const selectName = request.body.selectName;
+
+  MongoClient.connect(
+    url,
+    function(err, db) {
+      if (err) throw err;
+      let dbo = db.db('Form');
+      let deletedUser = {name: selectName};
+      dbo.collection('users').deleteOne(deletedUser, function(err, obj) {
+        if (err) throw err;
+        db.close();
+      });
+    }
+  );
+  response.send('<h1>User Deleted</h1><a href="/form.html">return to form</a>');
 });
